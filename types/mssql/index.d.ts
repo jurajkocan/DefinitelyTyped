@@ -1,7 +1,15 @@
-// Type definitions for mssql 4.0.2
+// Type definitions for mssql 4.0.5
 // Project: https://www.npmjs.com/package/mssql
-// Definitions by: COLSA Corporation <http://www.colsa.com/>, Ben Farr <https://github.com/jaminfarr>, Vitor Buzinaro <https://github.com/buzinas>, Matt Richardson <https://github.com/mrrichar/>, Jørgen Elgaard Larsen <https://github.com/elhaard/>, Peter Keuter <https://github.com/pkeuter/>
+// Definitions by: COLSA Corporation <http://www.colsa.com/>
+//                 Ben Farr <https://github.com/jaminfarr>
+//                 Vitor Buzinaro <https://github.com/buzinas>
+//                 Matt Richardson <https://github.com/mrrichar>
+//                 Jørgen Elgaard Larsen <https://github.com/elhaard>
+//                 Peter Keuter <https://github.com/pkeuter>
+//                 David Gasperoni <https://github.com/mcdado>
+//                 Jeff Wooden <https://github.com/woodenconsulting>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+// TypeScript Version: 2.1
 
 /// <reference types="node" />
 
@@ -126,6 +134,7 @@ export interface IProcedureResult<T> extends IResult<T> {
 }
 export interface IRecordSet<T> extends Array<T> {
     columns: IColumnMetadata;
+    toTable(): Table;
 }
 
 type IIsolationLevel = number;
@@ -148,11 +157,20 @@ export interface IOptions {
     trustedConnection?: boolean;
 }
 
-
 export interface IPool {
-    min: number;
-    max: number;
-    idleTimeoutMillis: number;
+    min?: number;
+    max?: number;
+    idleTimeoutMillis?: number;
+    maxWaitingClients?: number;
+    testOnBorrow?: boolean;
+    acquireTimeoutMillis?: number;
+    fifo?: boolean;
+    priorityRange?: number;
+    autostart?: boolean;
+    evictionRunIntervalMillis?: number;
+    numTestsPerRun?: number;
+    softIdleTimeoutMillis?: number;
+    Promise?: any;
 }
 
 export declare var pool: IPool;
@@ -185,6 +203,7 @@ export declare class ConnectionPool extends events.EventEmitter {
     public close(): Promise<void>;
     public close(callback: (err: any) => void): void;
     public request(): Request;
+    public transaction(): Transaction;
 }
 
 export declare class ConnectionError implements Error {
@@ -205,13 +224,13 @@ export interface IColumn extends ISqlType {
     primary: boolean;
 }
 
-declare class columns {
+declare class columns extends Array {
     public add(name: string, type: (() => ISqlType) | ISqlType, options?: IColumnOptions): number;
 }
 
-type IRow = (string | number | boolean | Date | Buffer)[];
+type IRow = (string | number | boolean | Date | Buffer | undefined)[];
 
-declare class rows {
+declare class rows extends Array {
     public add(...row: IRow): number;
 }
 
@@ -241,6 +260,7 @@ export declare class Request extends events.EventEmitter {
     public parameters: IRequestParameters;
     public verbose: boolean;
     public canceled: boolean;
+    public multiple: boolean;
     public stream: any;
     public constructor(connection?: ConnectionPool);
     public constructor(transaction: Transaction);
@@ -262,6 +282,8 @@ export declare class Request extends events.EventEmitter {
     public bulk(table: Table): Promise<number>;
     public bulk(table: Table, callback: (err: Error, rowCount: any) => void): void;
     public cancel(): void;
+    public pause(): boolean;
+    public resume(): boolean;
 }
 
 export declare class RequestError implements Error {
@@ -269,6 +291,12 @@ export declare class RequestError implements Error {
     public name: string;
     public message: string;
     public code: string;
+    public number?: number;
+    public state?: number;
+    public class?: number;
+    public lineNumber?: number;
+    public serverName?: string;
+    public procName?: string;
 }
 
 export declare class Transaction extends events.EventEmitter {
@@ -280,6 +308,7 @@ export declare class Transaction extends events.EventEmitter {
     public commit(callback: (err?: any) => void): void;
     public rollback(): Promise<void>;
     public rollback(callback: (err?: any) => void): void;
+    public request(): Request;
 }
 
 export declare class TransactionError implements Error {
@@ -296,12 +325,15 @@ export declare class PreparedStatement extends events.EventEmitter {
     public parameters: IRequestParameters;
     public stream: any;
     public constructor(connection?: ConnectionPool);
+    public constructor(transaction: Transaction);
     public input(name: string, type: (() => ISqlType) | ISqlType): PreparedStatement;
     public output(name: string, type: (() => ISqlType) | ISqlType): PreparedStatement;
     public prepare(statement?: string): Promise<void>;
     public prepare(statement?: string, callback?: (err?: Error) => void): PreparedStatement;
-    public execute(values: Object): Promise<void>;
-    public execute(values: Object, callback: (err?: Error) => void): Request;
+    public execute(values: Object): Promise<IProcedureResult<any>>;
+    public execute<Entity>(values: Object): Promise<IProcedureResult<Entity>>;
+    public execute(values: Object, callback: (err?: Error, result?: IProcedureResult<any>) => void): Request;
+    public execute<Entity>(values: Object, callback: (err?: Error, result?: IProcedureResult<Entity>) => void): Request;
     public unprepare(): Promise<void>;
     public unprepare(callback: (err?: Error) => void): PreparedStatement;
 }

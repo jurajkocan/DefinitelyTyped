@@ -1,44 +1,47 @@
-// Type definitions for @storybook/react 3.0
-// Project: https://github.com/storybooks/storybook
+// Type definitions for @storybook/react 4.0
+// Project: https://github.com/storybooks/storybook, https://github.com/storybooks/storybook/tree/master/app/react
 // Definitions by: Joscha Feth <https://github.com/joscha>
+//                 Anton Izmailov <https://github.com/wapgear>
+//                 Dan Dean <https://github.com/dandean>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.3
+// TypeScript Version: 2.8
 
-/// <reference types="node" />
+/// <reference types="webpack-env" />
 
-// TODO: Once TS2.3 is released,
-// https://github.com/Microsoft/TypeScript/issues/14819 should be fixed.
-// Then, upgrade this package's typescript version to 2.3 and
-// Remove the `declare module` wrapper.
-// tslint:disable-next-line no-single-declare-module
-declare module '@storybook/react' {
-    import * as React from 'react';
+import * as React from 'react';
 
-    type Renderable = React.StatelessComponent<any> | React.Component<any> | JSX.Element;
-    type RenderFunction = () => Renderable;
+export type Renderable = React.ComponentType | JSX.Element;
+export type RenderFunction = () => Renderable | Renderable[];
 
-    type StoryDecorator = (story: RenderFunction, context: { kind: string, story: string }) => Renderable | null;
-
-    interface Story {
-        add(storyName: string, callback: RenderFunction): Story;
-        addDecorator(decorator: StoryDecorator): Story;
-    }
-
-    function addDecorator(decorator: StoryDecorator): void;
-    function configure(fn: () => void, module: any): void;
-    function setAddon(addon: object): void;
-    function storiesOf(name: string, module: NodeModule): Story;
-    function storiesOf<T>(name: string, module: NodeModule): Story & T;
-
-    interface StoryObject {
-        name: string;
-        render: RenderFunction;
-    }
-
-    interface StoryBucket {
-        kind: string;
-        stories: StoryObject[];
-    }
-
-    function getStorybook(): StoryBucket[];
+export interface DecoratorParameters {
+    [key: string]: any;
 }
+export type StoryDecorator = (story: RenderFunction, context: { kind: string, story: string }) => Renderable | null;
+
+export interface Story {
+    readonly kind: string;
+    add(storyName: string, callback: RenderFunction, parameters?: DecoratorParameters): this;
+    addDecorator(decorator: StoryDecorator): this;
+    addParameters(parameters: DecoratorParameters): this;
+}
+
+export function addDecorator(decorator: StoryDecorator): void;
+export function addParameters(parameters: DecoratorParameters): void;
+export function clearDecorators(): void;
+export function configure(fn: () => void, module: NodeModule): void;
+export function setAddon(addon: object): void;
+export function storiesOf(name: string, module: NodeModule): Story;
+export function storiesOf<T>(name: string, module: NodeModule): Story & T;
+export function forceReRender(): void;
+
+export interface StoryObject {
+    name: string;
+    render: RenderFunction;
+}
+
+export interface StoryBucket {
+    kind: string;
+    stories: StoryObject[];
+}
+
+export function getStorybook(): StoryBucket[];

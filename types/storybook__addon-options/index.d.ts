@@ -1,25 +1,37 @@
-// Type definitions for @storybook/addon-options 3.0
-// Project: https://github.com/storybooks/storybook
+// Type definitions for @storybook/addon-options 4.0
+// Project: https://github.com/storybooks/storybook, https://github.com/storybooks/storybook/tree/master/addons/options
 // Definitions by: Joscha Feth <https://github.com/joscha>
+//                 Simon Helle Nielsen <https://github.com/simonhn>
+//                 A.MacLeay <https://github.com/amacleay>
+//                 Gaetan Maisse <https://github.com/gaetanmaisse>
+//                 Adam Misiorny <https://github.com/adam187>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.3
+// TypeScript Version: 2.8
 
-// TODO: Once TS2.3 is released,
-// https://github.com/Microsoft/TypeScript/issues/14819 should be fixed.
-// Then, upgrade this package's typescript version to 2.3 and
-// Remove the `declare module` wrapper.
-// tslint:disable-next-line no-single-declare-module
-declare module '@storybook/addon-options' {
-    interface Options {
-        name?: string;
-        url?: string;
-        goFullScreen?: boolean;
-        showLeftPanel?: boolean;
-        showDownPanel?: boolean;
-        showSearchBox?: boolean;
-        downPanelInRight?: boolean;
-        sortStoriesByKind?: boolean;
-    }
+import { StoryDecorator } from '@storybook/react';
 
-    function setOptions(options: Options): void;
+export interface Options {
+    name?: string;
+    url?: string;
+    goFullScreen?: boolean;
+    showLeftPanel?: boolean; // deprecated, use showStoriesPanel
+    showStoriesPanel?: boolean;
+    showDownPanel?: boolean; // deprecated; use showAddonPanel
+    showAddonPanel?: boolean;
+    showSearchBox?: boolean;
+    downPanelInRight?: boolean; // deprecated; use addonPanelInRight
+    addonPanelInRight?: boolean;
+    sortStoriesByKind?: boolean;
+    hierarchySeparator?: RegExp | string;
+    hierarchyRootSeparator?: RegExp | string;
+    sidebarAnimations?: boolean;
+    selectedAddonPanel?: string;
+    enableShortcuts?: boolean;
 }
+
+/**
+ * @deprecated Use withOptions instead
+ */
+export function setOptions(options: Options): void;
+
+export function withOptions(options: Options): StoryDecorator;

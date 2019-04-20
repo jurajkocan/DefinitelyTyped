@@ -1,4 +1,16 @@
-/* tslint:disable:no-arg object-literal-shorthand one-variable-per-declaration only-arrow-functions prefer-const prefer-for-of triple-equals no-var */
+// tslint:disable:no-arg
+// tslint:disable:no-var-keyword
+// tslint:disable:object-literal-key-quotes
+// tslint:disable:object-literal-shorthand
+// tslint:disable:one-variable-per-declaration
+// tslint:disable:only-arrow-functions
+// tslint:disable:prefer-conditional-expression
+// tslint:disable:prefer-const
+// tslint:disable:prefer-for-of
+// tslint:disable:prefer-switch
+// tslint:disable:prefer-template
+// tslint:disable:space-within-parens
+// tslint:disable:triple-equals
 
 function examples() {
     function add_0() {
@@ -372,7 +384,7 @@ function examples() {
     }
 
     function bind_2() {
-        function handler(event: JQuery.Event<HTMLElement, any>) {
+        function handler(event: JQuery.TriggeredEvent<HTMLElement>) {
             alert(event.data.foo);
         }
 
@@ -818,7 +830,7 @@ function examples() {
             var len = kids.addClass('hilite').length;
 
             $('#results span:first').text(len);
-            $('#results span:last').text((<HTMLElement> event.target).tagName);
+            $('#results span:last').text((event.target as Element).tagName);
 
             event.preventDefault();
         });
@@ -1202,14 +1214,13 @@ function examples() {
         // Attach a done, fail, and progress handler for the asyncEvent
         $.when(asyncEvent()).then(
             function(status) {
-                status === 3;
                 alert(status + ', things are going well');
             },
             function(status) {
                 alert(status + ', you fail this time');
             },
             function(status) {
-                // $('body').append(status);
+                $('body').append(status);
             },
         );
     }
@@ -1233,9 +1244,7 @@ function examples() {
         // Use the object as a Promise
         _obj.done(function(name) {
             _obj.hello(name); // Will alert "Hello John"
-        });
-        /// TODO: This doesn't work even though .done() returns this
-        //     .hello('Karl'); // Will alert "Hello Karl"
+        }).hello('Karl'); // Will alert "Hello Karl"
     }
 
     function deferred_then_0() {
@@ -1392,7 +1401,7 @@ function examples() {
     function each_2() {
         $('button').click(function() {
             $('div').each(function(index, element) {
-                // element == this
+                // element == this;
                 $(element).css('backgroundColor', 'yellow');
                 if ($(this).is('#stop')) {
                     $('span').text('Stopped at div index #' + index);
@@ -1569,7 +1578,7 @@ function examples() {
 
     function event_related_target_0() {
         $('a').mouseout(function(event) {
-            alert((<HTMLElement> event.relatedTarget).nodeName); // "DIV"
+            alert((event.relatedTarget as HTMLElement).nodeName); // "DIV"
         });
     }
 
@@ -1605,12 +1614,12 @@ function examples() {
 
     function event_target_0() {
         $('body').click(function(event) {
-            $('#log').html('clicked: ' + (<HTMLElement> event.target).nodeName);
+            $('#log').html('clicked: ' + (event.target as Node).nodeName);
         });
     }
 
     function event_target_1() {
-        function handler(event: JQuery.Event) {
+        function handler(event: JQuery.TriggeredEvent) {
             var target = $(event.target);
             if (target.is('li')) {
                 target.children().toggle();
@@ -2325,8 +2334,10 @@ function examples() {
     }
 
     function jQuery_contains_0() {
-        $.contains(document.documentElement, document.body); // true
-        $.contains(document.body, document.documentElement); // false
+        // tslint:disable-next-line no-unnecessary-type-assertion
+        $.contains(document.documentElement!, document.body); // true
+        // tslint:disable-next-line no-unnecessary-type-assertion
+        $.contains(document.body, document.documentElement!); // false
     }
 
     function jQuery_data_0() {
@@ -3007,10 +3018,10 @@ function examples() {
     function jQuery_proxy_0() {
         var me = {
             type: 'zombie',
-            test: function(event: JQuery.Event) {
+            test: function(event: JQuery.TriggeredEvent) {
                 // Without proxy, `this` would refer to the event target
                 // use event.target to reference that element.
-                var element = event.target;
+                var element = event.target as Element;
                 $(element).css('background-color', 'red');
 
                 // With proxy, `this` refers to the me object encapsulating
@@ -3022,7 +3033,7 @@ function examples() {
 
         var you = {
             type: 'person',
-            test: function(event: JQuery.Event) {
+            test: function(event: JQuery.TriggeredEvent) {
                 $('#log').append(this.type + ' ');
             },
         };
@@ -3035,13 +3046,13 @@ function examples() {
         // attach click handlers to #test
         $('#test')
         // this === "zombie"; handler unbound after first click
-            .on('click', $.proxy(me.test, me) as JQuery.EventHandler<HTMLElement>)
+            .on('click', $.proxy(me.test, me))
 
             // this === "person"
-            .on('click', youClick as JQuery.EventHandler<HTMLElement>)
+            .on('click', youClick)
 
             // this === "zombie"
-            .on('click', $.proxy(you.test, me) as JQuery.EventHandler<HTMLElement>)
+            .on('click', $.proxy(you.test, me))
 
             // this === "<button> element"
             .on('click', you.test);
@@ -3055,7 +3066,7 @@ function examples() {
                 $('#test').off('click', obj.test);
             },
         };
-        $('#test').on('click', jQuery.proxy(obj, 'test') as JQuery.EventHandler<HTMLElement>);
+        $('#test').on('click', jQuery.proxy(obj, 'test'));
     }
 
     function jQuery_proxy_2() {
@@ -3064,7 +3075,7 @@ function examples() {
             type: 'dog',
 
             // Note that event comes *after* one and two
-            test: function(one: any, two: any, event: any) {
+            test: function(one: typeof you, two: typeof they, event: JQuery.TriggeredEvent<HTMLElement>) {
                 $('#log')
 
                 // `one` maps to `you`, the 1st additional
@@ -3084,7 +3095,7 @@ function examples() {
 
                     // The clicked element is `event.target`,
                     // and its type is "button"
-                    .append('the ' + event.target.type + '.');
+                    .append('the ' + (event.target as HTMLButtonElement).type + '.');
             },
         };
 
@@ -3093,7 +3104,7 @@ function examples() {
 
         // Set up handler to execute me.test() in the context
         // of `me`, with `you` and `they` as additional arguments
-        var proxy = $.proxy(me.test, me, you, they) as JQuery.EventHandler<HTMLElement>;
+        var proxy = $.proxy(me.test, me, you, they);
 
         $('#test')
             .on('click', proxy);
@@ -3433,7 +3444,7 @@ function examples() {
     function map_0() {
         $('p')
             .append($('input').map(function() {
-                return $(this).val();
+                return $(this).val() as string;
             })
                 .get()
                 .join(', '));
@@ -3757,13 +3768,13 @@ function examples() {
 
     function offset_0() {
         var p = $('p:last');
-        var offset = p.offset();
+        var offset = p.offset()!;
         p.html('left: ' + offset.left + ', top: ' + offset.top);
     }
 
     function offset_1() {
         $('*', document.body).click(function(event) {
-            var offset = $(this).offset();
+            var offset = $(this).offset()!;
             event.stopPropagation();
             $('#result').text(this.tagName +
                 ' coords ( ' + offset.left + ', ' + offset.top + ' )');
@@ -3785,7 +3796,7 @@ function examples() {
     }
 
     function on_1() {
-        function myHandler(event: JQuery.Event<HTMLElement, { foo: string; }>) {
+        function myHandler(event: JQuery.TriggeredEvent<HTMLElement, { foo: string; }>) {
             alert(event.data.foo);
         }
 
